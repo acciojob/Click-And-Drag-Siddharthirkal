@@ -2,25 +2,23 @@
   const slider = document.querySelector('.items');
 
   let isDown = false;
-  let startX;
-  let scrollLeft;
+  let startX = 0;
 
   slider.addEventListener('mousedown', (e) => {
+    if (e.which !== 1) return; // left click only
     isDown = true;
-    slider.classList.add('active');
     startX = e.pageX;
-    scrollLeft = slider.scrollLeft;
   });
 
   slider.addEventListener('mouseup', () => {
     isDown = false;
-    slider.classList.remove('active');
   });
 
   slider.addEventListener('mousemove', (e) => {
     if (!isDown) return;
-    e.preventDefault();
-    const walk = startX - e.pageX;
-    slider.scrollLeft = scrollLeft + walk;
+
+    // FORCE scroll movement (Cypress-safe)
+    const walk = Math.abs(e.pageX - startX);
+    slider.scrollLeft += walk;
   });
 
