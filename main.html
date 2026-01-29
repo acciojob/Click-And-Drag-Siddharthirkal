@@ -35,32 +35,35 @@
   </div>
 
 <script>
-//Your code goes here 
-	
 const container = document.querySelector('.items');
 const items = document.querySelectorAll('.item');
 
-let activeItem = null;
-let offsetX = 0;
-let offsetY = 0;
-
-/* STEP 1: Arrange items in a grid initially */
+/* ---------------------------------------------------
+   GRID SETUP
+--------------------------------------------------- */
 const columns = 5;
 const gap = 20;
-const itemWidth = 200;
-const itemHeight = 200;
+const itemSize = 200;
 
 items.forEach((item, index) => {
   const row = Math.floor(index / columns);
   const col = index % columns;
 
-  item.style.left = col * (itemWidth + gap) + "px";
-  item.style.top = row * (itemHeight + gap) + "px";
+  item.style.left = col * (itemSize + gap) + "px";
+  item.style.top = row * (itemSize + gap) + "px";
 });
 
-/* STEP 2: Mouse Down (Select cube) */
+/* ---------------------------------------------------
+   CUBE DRAGGING
+--------------------------------------------------- */
+let activeItem = null;
+let offsetX = 0;
+let offsetY = 0;
+
 items.forEach(item => {
   item.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+
     activeItem = item;
 
     const rect = item.getBoundingClientRect();
@@ -71,7 +74,6 @@ items.forEach(item => {
   });
 });
 
-/* STEP 3: Mouse Move (Drag cube) */
 document.addEventListener('mousemove', (e) => {
   if (!activeItem) return;
 
@@ -80,7 +82,6 @@ document.addEventListener('mousemove', (e) => {
   let x = e.clientX - containerRect.left - offsetX;
   let y = e.clientY - containerRect.top - offsetY;
 
-  /* Boundary constraints */
   const maxX = container.clientWidth - activeItem.offsetWidth;
   const maxY = container.clientHeight - activeItem.offsetHeight;
 
@@ -91,7 +92,6 @@ document.addEventListener('mousemove', (e) => {
   activeItem.style.top = y + "px";
 });
 
-/* STEP 4: Mouse Up (Drop cube) */
 document.addEventListener('mouseup', () => {
   if (activeItem) {
     activeItem.style.zIndex = "";
@@ -99,7 +99,31 @@ document.addEventListener('mouseup', () => {
   }
 });
 
+/* ---------------------------------------------------
+   CONTAINER DRAG TO SCROLL (CYPRESS FIX)
+--------------------------------------------------- */
+let isScrolling = false;
+let startX = 0;
+let scrollStart = 0;
 
+container.addEventListener('mousedown', (e) => {
+  if (e.target !== container) return;
+
+  isScrolling = true;
+  startX = e.pageX;
+  scrollStart = container.scrollLeft;
+});
+
+container.addEventListener('mousemove', (e) => {
+  if (!isScrolling) return;
+
+  const walk = startX - e.pageX;
+  container.scrollLeft = scrollStart + walk;
+});
+
+document.addEventListener('mouseup', () => {
+  isScrolling = false;
+});
 </script>
 
   </body>
